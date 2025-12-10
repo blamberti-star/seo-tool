@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEO Audit Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0a0a0f 100%);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #e2e8f0;
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Header Styles */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 100px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      font-size: 14px;
+      color: #818cf8;
+      font-weight: 500;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 42px);
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #94a3b8;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Card Styles */
+    .card {
+      position: relative;
+      background: linear-gradient(145deg, #1a1a2e 0%, #16162a 100%);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      padding: 1px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #6366f1 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Form Styles */
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 12px;
+    }
+
+    .helper-text {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 16px;
+      background: #0d0d14;
+      border: 1px solid #2d2d44;
+      border-radius: 12px;
+      color: #e2e8f0;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      resize: vertical;
+      line-height: 1.6;
+      transition: box-shadow 0.2s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+    }
+
+    textarea::placeholder {
+      color: #475569;
+    }
+
+    /* Button Styles */
+    .btn-primary {
+      width: 100%;
+      padding: 16px 32px;
+      margin-top: 24px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      margin-top: 24px;
+      padding: 16px;
+      background: transparent;
+      border: 1px solid #2d2d44;
+      border-radius: 12px;
+      color: #94a3b8;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: #6366f1;
+      color: #fff;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Score Section */
+    .score-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+      padding: 40px 32px;
+    }
+
+    .score-ring {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.4)); }
+      50% { filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.6)); }
+    }
+
+    .grade-display {
+      text-align: left;
+    }
+
+    .grade-letter {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .grade-label {
+      color: #94a3b8;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    .summary-badge {
+      margin-top: 16px;
+      padding: 12px 20px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #a5b4fc;
+    }
+
+    /* Results Section */
+    .results-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .check-item {
+      padding: 20px;
+      border-radius: 12px;
+      animation: fadeIn 0.4s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .check-item.pass {
+      background: #0d2818;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .check-item.warning {
+      background: #2d2305;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .check-item.error {
+      background: #2d0a0a;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .check-item.info {
+      background: #1a1a2e;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .check-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .check-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .check-item.pass .check-icon {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+
+    .check-item.warning .check-icon {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+    }
+
+    .check-item.error .check-icon {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .check-item.info .check-icon {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+    }
+
+    .check-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .check-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .check-category {
+      font-weight: 600;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .check-score {
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .check-item.pass .check-score { color: #34d399; }
+    .check-item.warning .check-score { color: #fbbf24; }
+    .check-item.error .check-score { color: #f87171; }
+    .check-item.info .check-score { color: #818cf8; }
+
+    .check-message {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .check-value {
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-size: 12px;
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
+    .check-recommendation {
+      font-size: 13px;
+      line-height: 1.5;
+      padding-left: 12px;
+      border-left: 2px solid;
+    }
+
+    .check-item.pass .check-recommendation { color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+    .check-item.warning .check-recommendation { color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+    .check-item.error .check-recommendation { color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+    .check-item.info .check-recommendation { color: #818cf8; border-color: rgba(99, 102, 241, 0.3); }
+
+    /* Footer */
+    .footer {
+      margin-top: 48px;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid #1e1e3f;
+    }
+
+    .footer p {
+      color: #475569;
+      font-size: 13px;
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 16px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .score-section {
+        gap: 32px;
+        padding: 32px 24px;
+      }
+
+      .grade-letter {
+        font-size: 48px;
+      }
+
+      .check-content {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .check-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="badge">Free SEO Analysis Tool</div>
+      <h1>SEO Health Check</h1>
+      <p class="subtitle">Analyze your page's SEO fundamentals in seconds. Get actionable insights for better rankings.</p>
+    </div>
+
+    <!-- Input Section -->
+    <div id="inputSection" class="card">
+      <label for="htmlInput">Paste your page's HTML source code</label>
+      <p class="helper-text">Right-click on your page → "View Page Source" → Copy all → Paste below</p>
+      <textarea id="htmlInput" placeholder="<!DOCTYPE html>
+<html>
+<head>
+  <title>Your page title...</title>
+  ..."></textarea>
+      <button id="analyzeBtn" class="btn-primary" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        Analyze SEO
+      </button>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="hidden">
+      <!-- Score Card -->
+      <div id="scoreCard" class="card">
+        <div class="score-section">
+          <div class="score-ring">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="70" fill="none" stroke="#1e1e3f" stroke-width="12"></circle>
+              <circle id="scoreCircle" cx="80" cy="80" r="70" fill="none" stroke="#6366f1" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 440" transform="rotate(-90 80 80)" style="transition: stroke-dasharray 1s ease-out"></circle>
+              <text id="scoreNumber" x="80" y="72" text-anchor="middle" fill="#fff" font-size="42" font-weight="700" font-family="DM Sans">0</text>
+              <text x="80" y="100" text-anchor="middle" fill="#64748b" font-size="14" font-weight="500" font-family="DM Sans">out of 100</text>
+            </svg>
+          </div>
+          <div class="grade-display">
+            <div id="gradeLetter" class="grade-letter">-</div>
+            <div class="grade-label">SEO Grade</div>
+            <div id="summaryBadge" class="summary-badge">0 passed • 0 warnings • 0 errors</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Results -->
+      <div class="card">
+        <h2 class="results-title">Detailed Analysis</h2>
+        <div id="checkList" class="check-list"></div>
+      </div>
+
+      <!-- Reset Button -->
+      <button id="resetBtn" class="btn-secondary">← Analyze Another Page</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>This tool analyzes on-page SEO factors. For comprehensive audits including technical SEO, backlinks, and performance, contact us for a professional consultation.</p>
+    </div>
+  </div>
+
+  <script>
+    const htmlInput = document.getElementById('htmlInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const inputSection = document.getElementById('inputSection');
+    const resultsSection = document.getElementById('resultsSection');
+    const resetBtn = document.getElementById('resetBtn');
+    const checkList = document.getElementById('checkList');
+    const scoreCircle = document.getElementById('scoreCircle');
+    const scoreNumber = document.getElementById('scoreNumber');
+    const gradeLetter = document.getElementById('gradeLetter');
+    const summaryBadge = document.getElementById('summaryBadge');
+
+    // Enable/disable button based on input
+    htmlInput.addEventListener('input', () => {
+      analyzeBtn.disabled = !htmlInput.value.trim();
+    });
+
+    // Analyze button click
+    analyzeBtn.addEventListener('click', () => {
+      if (!htmlInput.value.trim()) return;
+      
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<div class="spinner"></div> Analyzing...';
+      
+      setTimeout(() => {
+        const results = analyzeHTML(htmlInput.value);
+        displayResults(results);
+        analyzeBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg> Analyze SEO`;
+        analyzeBtn.disabled = false;
+      }, 800);
+    });
+
+    // Reset button click
+    resetBtn.addEventListener('click', () => {
+      resultsSection.classList.add('hidden');
+      inputSection.classList.remove('hidden');
+      htmlInput.value = '';
+      analyzeBtn.disabled = true;
+    });
+
+    function analyzeHTML(htmlContent) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlContent, 'text/html');
+      
+      const checks = [];
+      let totalScore = 0;
+      let maxScore = 0;
+
+      // Title Tag
+      const title = doc.querySelector('title');
+      const titleText = title?.textContent?.trim() || '';
+      const titleLength = titleText.length;
+      maxScore += 10;
+      if (!title) {
+        checks.push({ category: 'Title Tag', status: 'error', score: 0, maxScore: 10, message: 'Missing title tag', recommendation: 'Add a unique, descriptive title tag between 50-60 characters.' });
+      } else if (titleLength < 30) {
+        checks.push({ category: 'Title Tag', status: 'warning', score: 5, maxScore: 10, message: `Title too short (${titleLength} chars)`, recommendation: 'Expand your title to 50-60 characters for optimal display in search results.', value: titleText });
+        totalScore += 5;
+      } else if (titleLength > 60) {
+        checks.push({ category: 'Title Tag', status: 'warning', score: 7, maxScore: 10, message: `Title may be truncated (${titleLength} chars)`, recommendation: 'Consider shortening to under 60 characters to prevent truncation in SERPs.', value: titleText });
+        totalScore += 7;
+      } else {
+        checks.push({ category: 'Title Tag', status: 'pass', score: 10, maxScore: 10, message: `Good title length (${titleLength} chars)`, value: titleText });
+        totalScore += 10;
+      }
+
+      // Meta Description
+      const metaDesc = doc.querySelector('meta[name="description"]');
+      const metaDescContent = metaDesc?.getAttribute('content')?.trim() || '';
+      const metaDescLength = metaDescContent.length;
+      maxScore += 10;
+      if (!metaDesc || !metaDescContent) {
+        checks.push({ category: 'Meta Description', status: 'error', score: 0, maxScore: 10, message: 'Missing meta description', recommendation: 'Add a compelling meta description between 150-160 characters that includes your target keywords.' });
+      } else if (metaDescLength < 120) {
+        checks.push({ category: 'Meta Description', status: 'warning', score: 5, maxScore: 10, message: `Description too short (${metaDescLength} chars)`, recommendation: 'Expand to 150-160 characters to maximize SERP real estate.', value: metaDescContent.substring(0, 100) + '...' });
+        totalScore += 5;
+      } else if (metaDescLength > 160) {
+        checks.push({ category: 'Meta Description', status: 'warning', score: 7, maxScore: 10, message: `Description may be truncated (${metaDescLength} chars)`, recommendation: 'Consider shortening to under 160 characters.', value: metaDescContent.substring(0, 100) + '...' });
+        totalScore += 7;
+      } else {
+        checks.push({ category: 'Meta Description', status: 'pass', score: 10, maxScore: 10, message: `Good description length (${metaDescLength} chars)`, value: metaDescContent.substring(0, 100) + '...' });
+        totalScore += 10;
+      }
+
+      // H1 Tag
+      const h1Tags = doc.querySelectorAll('h1');
+      maxScore += 10;
+      if (h1Tags.length === 0) {
+        checks.push({ category: 'H1 Heading', status: 'error', score: 0, maxScore: 10, message: 'No H1 tag found', recommendation: 'Add exactly one H1 tag containing your primary keyword.' });
+      } else if (h1Tags.length > 1) {
+        checks.push({ category: 'H1 Heading', status: 'warning', score: 5, maxScore: 10, message: `Multiple H1 tags found (${h1Tags.length})`, recommendation: 'Use only one H1 per page for clear content hierarchy.', value: h1Tags[0]?.textContent?.trim().substring(0, 60) });
+        totalScore += 5;
+      } else {
+        checks.push({ category: 'H1 Heading', status: 'pass', score: 10, maxScore: 10, message: 'Single H1 tag present', value: h1Tags[0]?.textContent?.trim().substring(0, 60) });
+        totalScore += 10;
+      }
+
+      // Heading Hierarchy
+      const h2Tags = doc.querySelectorAll('h2');
+      const h3Tags = doc.querySelectorAll('h3');
+      maxScore += 8;
+      if (h2Tags.length === 0) {
+        checks.push({ category: 'Heading Structure', status: 'warning', score: 3, maxScore: 8, message: 'No H2 subheadings found', recommendation: 'Add H2 tags to structure your content and include secondary keywords.' });
+        totalScore += 3;
+      } else {
+        checks.push({ category: 'Heading Structure', status: 'pass', score: 8, maxScore: 8, message: `Good structure: ${h2Tags.length} H2s, ${h3Tags.length} H3s` });
+        totalScore += 8;
+      }
+
+      // Images & Alt Tags
+      const images = doc.querySelectorAll('img');
+      const imagesWithAlt = Array.from(images).filter(img => img.getAttribute('alt')?.trim());
+      maxScore += 10;
+      if (images.length === 0) {
+        checks.push({ category: 'Image Alt Tags', status: 'info', score: 10, maxScore: 10, message: 'No images found', recommendation: 'Consider adding relevant images with descriptive alt text.' });
+        totalScore += 10;
+      } else if (imagesWithAlt.length < images.length) {
+        const missing = images.length - imagesWithAlt.length;
+        checks.push({ category: 'Image Alt Tags', status: 'warning', score: Math.round((imagesWithAlt.length / images.length) * 10), maxScore: 10, message: `${missing} of ${images.length} images missing alt text`, recommendation: 'Add descriptive alt text to all images for accessibility and SEO.' });
+        totalScore += Math.round((imagesWithAlt.length / images.length) * 10);
+      } else {
+        checks.push({ category: 'Image Alt Tags', status: 'pass', score: 10, maxScore: 10, message: `All ${images.length} images have alt text` });
+        totalScore += 10;
+      }
+
+      // Canonical Tag
+      const canonical = doc.querySelector('link[rel="canonical"]');
+      maxScore += 8;
+      if (!canonical) {
+        checks.push({ category: 'Canonical Tag', status: 'warning', score: 0, maxScore: 8, message: 'No canonical tag found', recommendation: 'Add a canonical tag to prevent duplicate content issues.' });
+      } else {
+        checks.push({ category: 'Canonical Tag', status: 'pass', score: 8, maxScore: 8, message: 'Canonical tag present', value: canonical.getAttribute('href')?.substring(0, 50) });
+        totalScore += 8;
+      }
+
+      // Meta Robots
+      const robots = doc.querySelector('meta[name="robots"]');
+      maxScore += 6;
+      const robotsContent = robots?.getAttribute('content')?.toLowerCase() || '';
+      if (robotsContent.includes('noindex')) {
+        checks.push({ category: 'Robots Meta', status: 'error', score: 0, maxScore: 6, message: 'Page set to noindex', recommendation: 'Remove noindex if you want this page to appear in search results.', value: robotsContent });
+      } else {
+        checks.push({ category: 'Robots Meta', status: 'pass', score: 6, maxScore: 6, message: robots ? 'Robots meta configured' : 'Default indexing (no restrictions)', value: robotsContent || 'index, follow (default)' });
+        totalScore += 6;
+      }
+
+      // Open Graph Tags
+      const ogTitle = doc.querySelector('meta[property="og:title"]');
+      const ogDesc = doc.querySelector('meta[property="og:description"]');
+      const ogImage = doc.querySelector('meta[property="og:image"]');
+      const ogCount = [ogTitle, ogDesc, ogImage].filter(Boolean).length;
+      maxScore += 8;
+      if (ogCount === 0) {
+        checks.push({ category: 'Open Graph', status: 'warning', score: 0, maxScore: 8, message: 'No Open Graph tags found', recommendation: 'Add og:title, og:description, and og:image for better social sharing.' });
+      } else if (ogCount < 3) {
+        checks.push({ category: 'Open Graph', status: 'warning', score: 4, maxScore: 8, message: `Partial OG tags (${ogCount}/3)`, recommendation: 'Complete your Open Graph setup with title, description, and image.' });
+        totalScore += 4;
+      } else {
+        checks.push({ category: 'Open Graph', status: 'pass', score: 8, maxScore: 8, message: 'Open Graph tags configured' });
+        totalScore += 8;
+      }
+
+      // Twitter Cards
+      const twitterCard = doc.querySelector('meta[name="twitter:card"]');
+      maxScore += 6;
+      if (!twitterCard) {
+        checks.push({ category: 'Twitter Cards', status: 'warning', score: 0, maxScore: 6, message: 'No Twitter Card meta tags', recommendation: 'Add Twitter Card tags for optimized X/Twitter sharing.' });
+      } else {
+        checks.push({ category: 'Twitter Cards', status: 'pass', score: 6, maxScore: 6, message: 'Twitter Card configured', value: twitterCard.getAttribute('content') });
+        totalScore += 6;
+      }
+
+      // Viewport Meta
+      const viewport = doc.querySelector('meta[name="viewport"]');
+      maxScore += 8;
+      if (!viewport) {
+        checks.push({ category: 'Mobile Viewport', status: 'error', score: 0, maxScore: 8, message: 'Missing viewport meta tag', recommendation: 'Add viewport meta for mobile responsiveness.' });
+      } else {
+        checks.push({ category: 'Mobile Viewport', status: 'pass', score: 8, maxScore: 8, message: 'Viewport configured for mobile' });
+        totalScore += 8;
+      }
+
+      // Language Attribute
+      const htmlLang = doc.documentElement.getAttribute('lang');
+      maxScore += 5;
+      if (!htmlLang) {
+        checks.push({ category: 'Language', status: 'warning', score: 0, maxScore: 5, message: 'No lang attribute on <html>', recommendation: 'Add lang="en" (or appropriate language) to your HTML tag.' });
+      } else {
+        checks.push({ category: 'Language', status: 'pass', score: 5, maxScore: 5, message: 'Language attribute set', value: htmlLang });
+        totalScore += 5;
+      }
+
+      // Schema/Structured Data
+      const jsonLd = doc.querySelectorAll('script[type="application/ld+json"]');
+      const microdata = doc.querySelector('[itemscope]');
+      maxScore += 10;
+      if (jsonLd.length === 0 && !microdata) {
+        checks.push({ category: 'Structured Data', status: 'warning', score: 0, maxScore: 10, message: 'No structured data found', recommendation: 'Add JSON-LD schema markup to enhance search appearance and enable rich results.' });
+      } else {
+        checks.push({ category: 'Structured Data', status: 'pass', score: 10, maxScore: 10, message: `Structured data present (${jsonLd.length} JSON-LD blocks)` });
+        totalScore += 10;
+      }
+
+      // Internal Links
+      const links = doc.querySelectorAll('a[href]');
+      const internalLinks = Array.from(links).filter(a => {
+        const href = a.getAttribute('href');
+        return href && (href.startsWith('/') || href.startsWith('#') || href.startsWith('./'));
+      });
+      maxScore += 6;
+      if (internalLinks.length < 3) {
+        checks.push({ category: 'Internal Links', status: 'warning', score: 3, maxScore: 6, message: `Few internal links (${internalLinks.length})`, recommendation: 'Add more internal links to help search engines discover your site structure.' });
+        totalScore += 3;
+      } else {
+        checks.push({ category: 'Internal Links', status: 'pass', score: 6, maxScore: 6, message: `${internalLinks.length} internal links found` });
+        totalScore += 6;
+      }
+
+      const percentage = Math.round((totalScore / maxScore) * 100);
+      
+      return {
+        score: percentage,
+        totalPoints: totalScore,
+        maxPoints: maxScore,
+        checks,
+        grade: percentage >= 90 ? 'A' : percentage >= 80 ? 'B' : percentage >= 70 ? 'C' : percentage >= 60 ? 'D' : 'F'
+      };
+    }
+
+    function getGradeColor(grade) {
+      const colors = { 'A': '#10b981', 'B': '#22c55e', 'C': '#f59e0b', 'D': '#f97316', 'F': '#ef4444' };
+      return colors[grade] || '#6366f1';
+    }
+
+    function getStatusIcon(status) {
+      switch (status) {
+        case 'pass': return '✓';
+        case 'warning': return '!';
+        case 'error': return '✕';
+        default: return 'i';
+      }
+    }
+
+    function displayResults(results) {
+      // Hide input, show results
+      inputSection.classList.add('hidden');
+      resultsSection.classList.remove('hidden');
+
+      // Update score circle
+      const gradeColor = getGradeColor(results.grade);
+      scoreCircle.style.stroke = gradeColor;
+      scoreCircle.style.strokeDasharray = `${results.score * 4.4} 440`;
+      scoreNumber.textContent = results.score;
+
+      // Update grade
+      gradeLetter.textContent = results.grade;
+      gradeLetter.style.color = gradeColor;
+
+      // Update summary
+      const passed = results.checks.filter(c => c.status === 'pass').length;
+      const warnings = results.checks.filter(c => c.status === 'warning').length;
+      const errors = results.checks.filter(c => c.status === 'error').length;
+      summaryBadge.textContent = `${passed} passed • ${warnings} warnings • ${errors} errors`;
+
+      // Build check items
+      checkList.innerHTML = '';
+      results.checks.forEach((check, index) => {
+        const item = document.createElement('div');
+        item.className = `check-item ${check.status}`;
+        item.style.animationDelay = `${index * 0.05}s`;
+
+        let valueHtml = check.value ? `<div class="check-value">${escapeHtml(check.value)}</div>` : '';
+        let recHtml = check.recommendation && check.status !== 'pass' 
+          ? `<div class="check-recommendation">💡 ${escapeHtml(check.recommendation)}</div>` 
+          : '';
+
+        item.innerHTML = `
+          <div class="check-content">
+            <div class="check-icon">${getStatusIcon(check.status)}</div>
+            <div class="check-details">
+              <div class="check-header">
+                <span class="check-category">${escapeHtml(check.category)}</span>
+                <span class="check-score">${check.score}/${check.maxScore}</span>
+              </div>
+              <p class="check-message">${escapeHtml(check.message)}</p>
+              ${valueHtml}
+              ${recHtml}
+            </div>
+          </div>
+        `;
+
+        checkList.appendChild(item);
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
